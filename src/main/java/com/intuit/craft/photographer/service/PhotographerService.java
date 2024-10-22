@@ -11,6 +11,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,12 +36,14 @@ public class PhotographerService {
     }
 
     public PhotographerDTO convertToDto(Photographer photographer) {
+        int age = calculateAge(LocalDate.parse(photographer.getDateOfBirth()), LocalDate.now());
         return new PhotographerDTO(
                 photographer.getId(),
                 photographer.getFirstName(),
                 photographer.getLastName(),
                 photographer.getEmail(),
-                photographer.getEventType()
+                photographer.getEventType(),
+                age
         );
     }
 
@@ -57,18 +62,18 @@ public class PhotographerService {
                         p.getFirstName(),
                         p.getLastName(),
                         p.getEmail(),
-                        p.getEventType()))
+                        p.getEventType(),
+                        calculateAge(LocalDate.parse(p.getDateOfBirth()), LocalDate.now())))
                 .collect(Collectors.toList());
     }
 
     @Cacheable(value = "youngestPhotographers")
     public List<PhotographerDTO> getYoungestPhotographers(int size) {
         List<Photographer> photographers = photographerRepository
-                .findAll(PageRequest.of(0, size, Sort.by("dateOfBirth").descending()))
-                .getContent();
+                .findAll(Sort.by("dateOfBirth").descending()).stream().limit(size).toList();
 
         return photographers.stream()
-                .map(this::convertToDto)
+                .map(this::convertToDto).sorted(Comparator.comparingInt(PhotographerDTO::getAge).thenComparing(PhotographerDTO::getFirstName))
                 .toList();
     }
 
@@ -89,6 +94,10 @@ public class PhotographerService {
         return photographers.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+
+    private int calculateAge(LocalDate birthDate, LocalDate currentDate) {
+        return Period.between(birthDate, currentDate).getYears();
     }
 
 }
