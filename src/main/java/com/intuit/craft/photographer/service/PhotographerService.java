@@ -27,7 +27,7 @@ public class PhotographerService {
         this.photographerRepository = photographerRepository;
     }
 
-    public Page<PhotographerDTO> getAllPhotographers(int page, int size) {
+    public Page<PhotographerDTO> getAllPhotographers(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Photographer> photographerPage = photographerRepository.findAll(pageable);
 
@@ -47,11 +47,11 @@ public class PhotographerService {
         );
     }
 
-    public Optional<Photographer> getPhotographerById(int id) {
+    public Optional<Photographer> getPhotographerById(Long userId, int id) {
         return photographerRepository.findById(id);
     }
 
-    public List<PhotographerDTO> getPhotographersByEventType(String eventType) {
+    public List<PhotographerDTO> getPhotographersByEventType(Long userId, String eventType) {
         List<Photographer> photographers = photographerRepository.findByEventType(eventType);
 
         // Filter photographers based on the event type
@@ -68,7 +68,7 @@ public class PhotographerService {
     }
 
     @Cacheable(value = "youngestPhotographers")
-    public List<PhotographerDTO> getYoungestPhotographers(int size) {
+    public List<PhotographerDTO> getYoungestPhotographers(Long userId, int size) {
         List<Photographer> photographers = photographerRepository
                 .findAll(Sort.by("dateOfBirth").descending()).stream().limit(size).toList();
 
@@ -88,7 +88,7 @@ public class PhotographerService {
     }
 
 
-    public List<PhotographerDTO> getPhotographersByProximity(double lat, double lng, double radius) {
+    public List<PhotographerDTO> getPhotographersByProximity(Long userId, double lat, double lng, double radius) {
         List<Photographer> photographers = photographerRepository.findPhotographersByProximity(lat, lng, radius);
 
         return photographers.stream()

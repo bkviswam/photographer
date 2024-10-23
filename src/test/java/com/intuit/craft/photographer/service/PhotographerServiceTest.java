@@ -53,7 +53,7 @@ public class PhotographerServiceTest {
         when(photographerRepository.findAll(pageable)).thenReturn(photographerPage);
 
         // Call the service method
-        Page<PhotographerDTO> result = photographerService.getAllPhotographers(0, 10);
+        Page<PhotographerDTO> result = photographerService.getAllPhotographers(1L, 0, 10);
 
         // Verify the interactions and the result
         assertThat(result).isNotNull();
@@ -72,7 +72,7 @@ public class PhotographerServiceTest {
         when(photographerRepository.findAll()).thenReturn(photographers);
 
         // Call the service method
-        List<PhotographerDTO> result = photographerService.getPhotographersByEventType("wedding");
+        List<PhotographerDTO> result = photographerService.getPhotographersByEventType(1L, "wedding");
 
         // Verify the result
         assertThat(result).isNotNull();
@@ -90,7 +90,7 @@ public class PhotographerServiceTest {
 
         when(photographerRepository.findAll()).thenReturn(photographers);
 
-        List<PhotographerDTO> result = photographerService.getPhotographersByEventType("corporate");
+        List<PhotographerDTO> result = photographerService.getPhotographersByEventType(1L,"corporate");
 
         assertThat(result).isEmpty();
 
@@ -101,7 +101,7 @@ public class PhotographerServiceTest {
     void testGetPhotographerById_Found() {
         when(photographerRepository.findById(1)).thenReturn(Optional.of(photographer));
 
-        Optional<Photographer> result = photographerService.getPhotographerById(1);
+        Optional<Photographer> result = photographerService.getPhotographerById(1L, 1);
 
         assertThat(result).isPresent();
         assertThat(result.get().getFirstName()).isEqualTo("John");
@@ -113,7 +113,7 @@ public class PhotographerServiceTest {
     void testGetPhotographerById_NotFound() {
         when(photographerRepository.findById(2)).thenReturn(Optional.empty());
 
-        Optional<Photographer> result = photographerService.getPhotographerById(2);
+        Optional<Photographer> result = photographerService.getPhotographerById(1L,2);
 
         assertThat(result).isEmpty();
 

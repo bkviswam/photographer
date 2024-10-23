@@ -1,4 +1,4 @@
-package com.intuit.craft.photographer.service;
+package com.intuit.craft.photographer.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
