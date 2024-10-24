@@ -5,13 +5,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @Entity
 @Table(name = "photographers")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Photographer {
+public class Photographer implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     private int id;

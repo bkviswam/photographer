@@ -41,16 +41,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             try {
                 String username = extractUsername(jwt);
                 String role = extractRole(jwt);
-                log.debug("Extracted username: {}, role: {}", username, role);
-
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             username, null, List.of(new SimpleGrantedAuthority(role))
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-
-                    log.debug("Authentication set for user: {}", username);
                 } else {
                     log.warn("Username is null or authentication already set");
                 }

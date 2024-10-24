@@ -1,10 +1,12 @@
 package com.intuit.craft.photographer.dto;
 
 import lombok.Data;
+
+import java.io.Serializable;
 import java.util.List;
 
 @Data
-public class PhotographerDTO {
+public class PhotographerDTO implements Serializable {
     private int id;
     private String firstName;
     private String lastName;

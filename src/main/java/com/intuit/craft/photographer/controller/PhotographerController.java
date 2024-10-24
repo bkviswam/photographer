@@ -1,13 +1,14 @@
 package com.intuit.craft.photographer.controller;
 
+import com.intuit.craft.photographer.dto.PaginatedResponse;
 import com.intuit.craft.photographer.dto.PhotographerDTO;
 import com.intuit.craft.photographer.model.Photographer;
 import com.intuit.craft.photographer.service.PhotographerService;
 import com.intuit.craft.photographer.security.JwtUtil;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.PagedModel;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.web.bind.annotation.*;
@@ -27,24 +28,27 @@ public class PhotographerController {
 
     // Retrieve all photographers with pagination
     @GetMapping
-    public ResponseEntity<PagedModel<EntityModel<PhotographerDTO>>> getAllPhotographers(
+    public ResponseEntity<PaginatedResponse<PhotographerDTO>> getAllPhotographers(
             @RequestHeader("Authorization") String token,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size, PagedResourcesAssembler<PhotographerDTO> assembler) {
 
         Long userId = jwtUtil.extractUserId(token.substring(7)); // Extract user ID from JWT
-
         Page<PhotographerDTO> photographerPage = photographerService.getAllPhotographers(userId, page, size);
-        PagedModel<EntityModel<PhotographerDTO>> model = assembler.toModel(photographerPage);
-
-        return ResponseEntity.ok(model);
+        PaginatedResponse<PhotographerDTO> response = new PaginatedResponse<>(
+                photographerPage.getContent(),
+                photographerPage.getNumber(),
+                photographerPage.getTotalPages(),
+                photographerPage.getTotalElements()
+        );
+        return ResponseEntity.ok(response);
     }
 
     // Retrieve a photographer by their ID
     @GetMapping("/{id}")
     public ResponseEntity<Photographer> getPhotographerById(
             @RequestHeader("Authorization") String token,
-            @PathVariable int id) {
+            @PathVariable("id") @Min(1) int id) {
 
         Long userId = jwtUtil.extractUserId(token.substring(7)); // Verify user ID from token
         Optional<Photographer> photographer = photographerService.getPhotographerById(userId, id);
@@ -57,7 +61,7 @@ public class PhotographerController {
     @GetMapping("/event/{eventType}")
     public List<PhotographerDTO> getPhotographersByEventType(
             @RequestHeader("Authorization") String token,
-            @PathVariable String eventType) {
+            @PathVariable @Pattern(regexp = "^[A-Za-z]+$", message = "Event type must contain only letters") String eventType) {
 
         Long userId = jwtUtil.extractUserId(token.substring(7));
         return photographerService.getPhotographersByEventType(userId, eventType);
@@ -77,9 +81,9 @@ public class PhotographerController {
     @GetMapping("/proximity")
     public List<PhotographerDTO> getPhotographersByProximity(
             @RequestHeader("Authorization") String token,
-            @RequestParam double lat,
-            @RequestParam double lng,
-            @RequestParam double radius) {
+            @RequestParam @Min(-90) double lat,
+            @RequestParam @Min(-180) double lng,
+            @RequestParam @Min(1) double radius) {
 
         Long userId = jwtUtil.extractUserId(token.substring(7));
         return photographerService.getPhotographersByProximity(userId, lat, lng, radius);

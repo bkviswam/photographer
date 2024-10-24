@@ -21,8 +21,26 @@ services:
       timeout: 5s
       retries: 3
 
+  redis:
+    image: redis:6.2
+    container_name: redis-cache-photographer
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    networks:
+      - photographer-service-network
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
 volumes:
   mysql_data:
+  redis_data:
 
 networks:
   photographer-service-network:
+    driver: bridge
