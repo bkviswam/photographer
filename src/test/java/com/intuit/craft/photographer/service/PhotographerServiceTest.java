@@ -9,13 +9,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +42,7 @@ public class PhotographerServiceTest {
         photographer.setLastName("Doe");
         photographer.setEmail("john.doe@email.com");
         photographer.setEventType(Arrays.asList("wedding", "birthday"));
+        photographer.setDateOfBirth(LocalDate.of(1990, 1, 1).toString());
     }
 
     @Test
@@ -71,7 +71,7 @@ public class PhotographerServiceTest {
         List<Photographer> photographers = Collections.singletonList(photographer);
 
         // Mock the repository behavior
-        when(photographerRepository.findAll()).thenReturn(photographers);
+        when(photographerRepository.findByEventType("wedding")).thenReturn(photographers);
 
         // Call the service method
         List<PhotographerDTO> result = photographerService.getPhotographersByEventType(1L, "wedding");
@@ -83,20 +83,22 @@ public class PhotographerServiceTest {
         assertThat(result.get(0).getEventType()).contains("wedding");
 
         // Verify repository interaction
-        verify(photographerRepository, times(1)).findAll();
+        verify(photographerRepository, times(1)).findByEventType("wedding");
     }
 
     @Test
     void testGetPhotographersByEventType_NoMatch() {
-        List<Photographer> photographers = Collections.singletonList(photographer);
+        // Mock the repository to return an empty list
+        when(photographerRepository.findByEventType("corporate")).thenReturn(Collections.emptyList());
 
-        when(photographerRepository.findAll()).thenReturn(photographers);
+        // Call the service method
+        List<PhotographerDTO> result = photographerService.getPhotographersByEventType(1L, "corporate");
 
-        List<PhotographerDTO> result = photographerService.getPhotographersByEventType(1L,"corporate");
-
+        // Verify the result
         assertThat(result).isEmpty();
 
-        verify(photographerRepository, times(1)).findAll();
+        // Verify repository interaction
+        verify(photographerRepository, times(1)).findByEventType("corporate");
     }
 
     @Test
@@ -115,12 +117,13 @@ public class PhotographerServiceTest {
     void testGetPhotographerById_NotFound() {
         when(photographerRepository.findById(2)).thenReturn(Optional.empty());
 
-        Optional<Photographer> result = photographerService.getPhotographerById(1L,2);
+        Optional<Photographer> result = photographerService.getPhotographerById(1L, 2);
 
         assertThat(result).isEmpty();
 
         verify(photographerRepository, times(1)).findById(2);
     }
+
     @Test
     void testConvertToDto() {
         PhotographerDTO dto = photographerService.convertToDto(photographer);
@@ -130,13 +133,4 @@ public class PhotographerServiceTest {
         assertThat(dto.getFirstName()).isEqualTo("John");
         assertThat(dto.getEventType()).contains("wedding", "birthday");
     }
-
-   /* @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
-
-    @Test
-    public void testRedis() {
-        redisTemplate.opsForValue().set("testKey", "Hello Redis!");
-        System.out.println("Redis Value: " + redisTemplate.opsForValue().get("testKey"));
-    }*/
 }
