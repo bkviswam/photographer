@@ -1,10 +1,19 @@
 package com.intuit.craft.photographer;
 
+import com.intuit.craft.photographer.repository.PhotographerRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+		"spring.cache.type=none",
+		"spring.redis.host=disabled",
+		"spring.profiles.active=test",
+		"spring.cloud.vault.enabled=false"})
 class CraftDemoPhotographerServiceApplicationTests {
+
+	@MockBean
+	private PhotographerRepository photographerRepository;
 
 	@Test
 	void contextLoads() {
