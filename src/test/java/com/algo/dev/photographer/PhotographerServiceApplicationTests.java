@@ -10,7 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 		"spring.redis.host=disabled",
 		"spring.profiles.active=test",
 		"spring.cloud.vault.enabled=false"})
-class CraftDemoPhotographerServiceApplicationTests {
+class PhotographerServiceApplicationTests {
 
 	@MockBean
 	private PhotographerRepository photographerRepository;
