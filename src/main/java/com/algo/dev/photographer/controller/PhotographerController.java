@@ -61,10 +61,10 @@ public class PhotographerController {
     @GetMapping("/event/{eventType}")
     public List<PhotographerDTO> getPhotographersByEventType(
             @RequestHeader("Authorization") String token,
-            @PathVariable @Pattern(regexp = "^[A-Za-z]+$", message = "Event type must contain only letters") String eventType) {
+            @PathVariable @Pattern(regexp = "^[A-Za-z ]+$", message = "Event type must contain only letters") String eventType) {
 
         Long userId = jwtUtil.extractUserId(token.substring(7));
-        return photographerService.getPhotographersByEventType(userId, eventType);
+        return photographerService.getPhotographersByEventType(userId, eventType.trim());
     }
 
     // Retrieve the youngest photographers

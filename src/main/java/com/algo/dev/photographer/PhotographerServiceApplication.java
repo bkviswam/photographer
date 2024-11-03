@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.validation.annotation.Validated;
 
-@SpringBootApplication(scanBasePackages = {"com.intuit.craft.photographer"})
+@SpringBootApplication(scanBasePackages = {"com.algo.dev.photographer"})
 @EnableCaching
 @Validated
 public class PhotographerServiceApplication {
