@@ -6,7 +6,7 @@ Here’s your updated `README.md` with masked sensitive data and a section on Va
 
 ## Overview
 
-The **Craft Photographer Service** is a Spring Boot application designed to manage photographers, providing search capabilities based on event types, proximity, and other attributes. It uses Redis for caching, MySQL as the primary database, and supports JWT-based authentication. Secure credentials are managed through HashiCorp Vault.
+The **Photographer Service** is a Spring Boot application designed to manage photographers, providing search capabilities based on event types, proximity, and other attributes. It uses Redis for caching, MySQL as the primary database, and supports JWT-based authentication. Secure credentials are managed through HashiCorp Vault.
 
 ## Features
 
