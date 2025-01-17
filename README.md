@@ -2,7 +2,7 @@ Here’s your updated `README.md` with masked sensitive data and a section on Va
 
 ---
 
-# Craft Photographer Service
+# Photographer Service
 
 ## Overview
 
