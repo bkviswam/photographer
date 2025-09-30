@@ -1,0 +1,57 @@
+vars:
+  branch: "{{ awx_scm_branch | default('main') }}"
+  target_namespace: "photographer-prod"
+  spring_profile: "prod"
+tasks:
+  - name: Ensure kubernetes collection present
+    ansible.builtin.meta: noop  # (EE should pre-bundle kubernetes.core)
+
+  - name: Checkout code (shallow)
+    ansible.builtin.git:
+      repo: "{{ repo_url }}"
+      dest: ./workspace
+      version: "{{ branch }}"
+      depth: 1
+
+  - name: Run tests
+    ansible.builtin.shell: |
+      ./gradlew clean test
+    args: { chdir: ./workspace }
+
+  - name: Build & push image with Jib
+    ansible.builtin.shell: |
+      IMAGE_TAG="{{ image_tag }}" SPRING_PROFILE=dev \
+      ./gradlew -DskipTests jib \
+        -Djib.to.image={{ container_image }} \
+        -Djib.to.auth.username=${REGISTRY_USER} \
+        -Djib.to.auth.password=${REGISTRY_PASS}
+    environment:
+      REGISTRY_USER: "{{ lookup('env','REGISTRY_USER') or registry_user | default('') }}"
+      REGISTRY_PASS: "{{ lookup('env','REGISTRY_PASS') or registry_pass | default('') }}"
+    args: { chdir: ./workspace }
+
+  - name: Create namespaces
+    kubernetes.core.k8s:
+      state: present
+      src: k8s/namespaces.yaml
+    args: { chdir: ./workspace }
+
+  - name: Deploy MySQL (dev)
+    kubernetes.core.k8s:
+      state: present
+      template: k8s/mysql.yaml
+      namespace: "{{ target_namespace }}"
+    args: { chdir: ./workspace }
+
+  - name: Deploy app (dev)
+    kubernetes.core.k8s:
+      state: present
+      template: k8s/photographer.yaml
+      namespace: "{{ target_namespace }}"
+      wait: true
+      wait_timeout: 300
+      template_vars:
+        container_image: "{{ container_image }}"
+        target_namespace: "{{ target_namespace }}"
+        spring_profile: "{{ spring_profile }}"
+    args: { chdir: ./workspace }

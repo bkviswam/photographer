@@ -2,6 +2,19 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.4'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'com.google.cloud.tools.jib' version '3.4.3'
+}
+jib {
+	from { image = 'eclipse-temurin:17-jre' }
+	to {
+		// Use your registry (Docker Hub or GHCR). Example uses GHCR:
+		image = "ghcr.io/bkviswam/photographer:${System.getenv('IMAGE_TAG') ?: 'dev-latest'}"
+		// Auth provided via env at runtime in AWX / Airflow
+	}
+	container {
+		ports = ['8080']
+		jvmFlags = ['-Dspring.profiles.active=' + (System.getenv('SPRING_PROFILE') ?: 'dev')]
+	}
 }
 
 group = 'com.intuit.photographer'
@@ -17,6 +30,7 @@ repositories {
 	mavenCentral()
 	//maven { url 'https://repo.spring.io/release' }
 }
+
 
 dependencies {
 	// Spring Boot Starters
